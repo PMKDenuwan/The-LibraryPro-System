@@ -243,13 +243,6 @@ public class LibraryPro {
         System.out.println();
     }
 
-    public static int findBookIndexByID(String bookID) {
-        for (int i = 0; i < bookCount; i++) {
-            if (books[i][0].equals(bookID)) return i;
-        }
-        return -1;
-    }
-
     // ===================== Manage Members =====================
     public static void manageMembersMenu(Scanner input) {
         while (true) {
@@ -411,13 +404,6 @@ public class LibraryPro {
         System.out.println();
     }
 
-    public static int findMemberIndexByID(String memberID) {
-        for (int i = 0; i < memberCount; i++) {
-            if (members[i][0].equals(memberID)) return i;
-        }
-        return -1;
-    }
-
     // ===================== Issue Book =====================
     public static void issueBook(Scanner input) {
         System.out.println("\n--- 📖 Issue Book ---");
@@ -555,17 +541,17 @@ public class LibraryPro {
         System.out.print("Enter current date (yyyy-MM-dd) to check overdue books: ");
         String currentDateStr = input.nextLine();
         if (!isValidDateFormat(currentDateStr)) {
-            System.out.println("Invalid date format. Please use yyyy-MM-dd.\n");
+            System.out.println("❌ Invalid date format. Please use yyyy-MM-dd.\n");
             return;
         }
         int currentDays = dateToDays(currentDateStr);
         if (currentDays == -1) {
-            System.out.println("Error parsing current date.\n");
+            System.out.println("❌ Error parsing current date.\n");
             return;
         }
         boolean foundOverdue = false;
         System.out.println("\n--- 📋 Overdue Books ---");
-        System.out.printf("%-10s %-12s %-12s %-12s %-10s\n", "Book ID", "Member ID", "Due Date", "Days Overdue", "Fine (LKR)");
+        System.out.printf("%-10s %-12s %-12s %-12s %-10s\n", "Book ID", "Member ID", "Due Date", "Days Overdue", "Fine ($)");
         System.out.println("--------------------------------------------------------------");
         for (int i = 0; i < issuedCount; i++) {
             String bookID = issuedBooks[i][0];
@@ -576,8 +562,8 @@ public class LibraryPro {
             int overdueDays = currentDays - dueDays;
             if (overdueDays > 0) {
                 foundOverdue = true;
-                int fine = overdueDays * 50;
-                System.out.printf("%-10s %-12s %-12s %-12d %-10d\n", bookID, memberID, dueDateStr, overdueDays, fine);
+                double fine = overdueDays * 0.50;
+                System.out.printf("%-10s %-12s %-12s %-12d $%-9.2f\n", bookID, memberID, dueDateStr, overdueDays, fine);
             }
         }
         if (!foundOverdue) {
@@ -616,6 +602,20 @@ public class LibraryPro {
 
     // ===================== Helpers =====================
 
+    public static int findBookIndexByID(String bookID) {
+        for (int i = 0; i < bookCount; i++) {
+            if (books[i][0].equals(bookID)) return i;
+        }
+        return -1;
+    }
+
+    public static int findMemberIndexByID(String memberID) {
+        for (int i = 0; i < memberCount; i++) {
+            if (members[i][0].equals(memberID)) return i;
+        }
+        return -1;
+    }
+
     public static int findIssuedBookIndex(String bookID, String memberID) {
         for (int i = 0; i < issuedCount; i++) {
             if (issuedBooks[i][0].equals(bookID) && issuedBooks[i][1].equals(memberID)) {
@@ -625,23 +625,19 @@ public class LibraryPro {
         return -1;
     }
 
-    // Validate phone number (digits only, length 7-15)
     public static boolean isValidPhoneNumber(String phone) {
         return phone.matches("\\d{7,15}");
     }
 
-    // Validate email format (simple regex)
     public static boolean isValidEmail(String email) {
         String emailRegex = "^[\\w.-]+@[\\w.-]+\\.[A-Za-z]{2,6}$";
         return Pattern.matches(emailRegex, email);
     }
 
-    // Validate date format yyyy-MM-dd (simple check)
     public static boolean isValidDateFormat(String date) {
         return date.matches("\\d{4}-\\d{2}-\\d{2}");
     }
 
-    // Convert date yyyy-MM-dd to total days (approximate)
     public static int dateToDays(String date) {
         String[] parts = date.split("-");
         if (parts.length != 3) return -1;
