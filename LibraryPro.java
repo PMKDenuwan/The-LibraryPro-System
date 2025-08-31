@@ -1,670 +1,943 @@
-import java.util.Scanner;
-import java.util.regex.Pattern;
+import java.util.*;
 
-public class LibraryPro {
-
-    // Book: [Book ID, Title, Author, Genre, Quantity]
-    static String[][] books = new String[100][5];
+class LibraryPro{
     static int bookCount = 0;
-
-    // Member: [Member ID, Name, Contact Number, Email]
-    static String[][] members = new String[100][4];
     static int memberCount = 0;
+    //Array - Books
+    static String[][] books = new String[5][0];
+    //Array - Members
+    static String[][] members = new String[4][0];
+	//Array - Issued Books
+	static String[][] issuedBooks = new String[3][0];
 
-    // Issued Book: [Book ID, Member ID, Due Date]
-    static String[][] issuedBooks = new String[100][3];
-    static int issuedCount = 0;
+    // Check Book Id and add books
+    public static void addBooks(Scanner input){
+		clearConsole();
+		String bookId, title, author, genre;
+		int quantity;
+		input.nextLine();
+		System.out.print("Enter Book ID: ");
+		bookId = input.nextLine();
+		while(true){
+			boolean found = false;
+			for(int i=0;i<books[0].length;i++){
+				if(books[0][i].equals(bookId)){
+					found = true;
+				}
+			}
+			if(found == true){
+				System.out.println("This Book ID already exists!");
+				System.out.print("Enter a new book ID: ");
+				bookId = input.nextLine();
+			}else{
+				break;
+			}
+		}
+		System.out.print("Enter Title: ");
+		title = input.nextLine();
+		System.out.print("Enter Author: ");
+		author = input.nextLine();
+		System.out.print("Enter Genre: ");
+		genre = input.nextLine();
+		System.out.print("Enter Quantity: ");
+		quantity =input.nextInt();
+		input.nextLine();
+        // Check books quantity
+		while(true){
+			if(quantity<0){
+				System.out.print("Please Enter valid quantity: ");
+				quantity = input.nextInt();
+				input.nextLine();
+			}else{
+				break;
+			}
+		}
+        // Create a tempory array and copy values from book array 
+		String[][] temp = new String[5][books[0].length+1];
+		for (int j=0;j<books.length;j++){
+			for(int i=0;i<books[j].length;i++){
+				temp[j][i] = books[j][i];
+			}
+		}
+
+        // Add values to the last elements
+		temp[0][temp[0].length-1] = bookId;
+		temp[1][temp[1].length-1] = title;
+		temp[2][temp[2].length-1] = author;
+		temp[3][temp[3].length-1] = genre;
+		temp[4][temp[4].length-1] = Integer.toString(quantity);
+
+        // Copy tempory array to the original book array
+		books = temp;
+		bookCount++;
+		System.out.println("Book added successfully.\n");
+	}
+
+    // Updates Books
+    public static void updateBooks(Scanner input){
+		clearConsole();
+		String bookId;
+		int newQuantity;
+		input.nextLine();
+		System.out.print("Enter Book ID to update: ");
+		bookId = input.next();
+
+		// Find index of Entered book ID
+		int index = -1;
+		for(int i=0;i<books[0].length;i++){
+			if(books[0][i].equals(bookId)){
+				index = i;
+			}
+		}
+		if(index < 0){
+			System.out.println("This Book doesn't exists!\n");
+		}else{
+			System.out.print("Enter new Title: ");
+			books[1][index] = input.nextLine();
+			System.out.print("Enter new Author: ");
+			books[2][index] = input.nextLine();
+			System.out.print("Enter new Genre: ");
+			books[3][index] = input.nextLine();
+			System.out.print("Enter new Quantity: ");
+			newQuantity =input.nextInt();
+			while(true){
+				if(newQuantity<0){
+					System.out.print("Please Enter valid quantity: ");
+					newQuantity = input.nextInt();
+				}else{
+					break;
+				}
+			}
+			books[4][index] = Integer.toString(newQuantity);
+			System.out.println("Book updated successfully.\n");
+		}
+	}
+
+    // Delete Books
+    public static void deleteBooks(Scanner input){
+		clearConsole();
+		String bookId;
+		input.nextLine();
+		System.out.print("Enter Book ID to delete: ");
+		bookId = input.next();
+
+		// Find index of Entered book ID
+		int index = -1;
+		for(int i=0;i<books[0].length;i++){
+			if(books[0][i].equals(bookId)){
+				index = i;
+			}
+		}
+		if(index < 0){
+			System.out.println("This Book doesn't exists!\n");
+		}else{
+			String[][] temp = new String[5][books[0].length-1];
+			for(int j=0;j<books.length;j++){
+				for(int i=0;i<temp[j].length;i++){
+					if(i >= index){
+						temp[j][i] = books[j][i+1];
+					}else{
+						temp[j][i] = books[j][i];
+					}
+				}
+			}
+			books = temp;
+            bookCount--;
+			System.out.println("Book deleted successfully.\n");
+		}
+	}
+
+    // Find Books
+    public static void searchBooks(Scanner input){
+		clearConsole();
+		String bookId;
+		input.nextLine();
+		System.out.print("Enter Book ID to search: ");
+		bookId = input.next();
+
+		// Find index of Entered book ID
+		int index = -1;
+		for(int i=0;i<books[0].length;i++){
+			if(books[0][i].equals(bookId)){
+				index = i;
+			}
+		}
+		if(index < 0){
+			System.out.println("Book not found.\n");
+		}else{
+			System.out.println("\nBook Details:");
+			System.out.println("ID: " + books[0][index]);
+			System.out.println("Title: " + books[1][index]);
+			System.out.println("Author: " + books[2][index]);
+			System.out.println("Genre: " + books[3][index]);
+			System.out.println("Quantity: " + books[4][index] + "\n");
+		}
+	}
+
+    // View All Books
+    public static void viewAllBooks(){
+		clearConsole();
+		if(bookCount == 0){
+			System.out.println("Catalog is empty.\n");
+		}else{
+			System.out.println("\t\t\t\t\t--- All Books ---");
+			System.out.println("Book ID\t\t\tTitle\t\t\tAuthor\t\t\tGenre\t\t\tQuantity");
+			System.out.println();
+			for(int j=0;j<books[0].length;j++){
+				for(int i=0;i<books.length;i++){
+					System.out.print(books[i][j]+"\t\t\t");
+				}
+				System.out.println();
+			}
+		}
+	}
+
+    // Check Member Id and add members
+    public static void addMembers(Scanner input){
+		clearConsole();
+		String memberId, name, contactNumber, email;
+		input.nextLine();
+		System.out.print("Enter member ID: ");
+		memberId = input.nextLine();
+		while(true){
+			boolean found = false;
+			for(int i=0;i<members[0].length;i++){
+				if(members[0][i].equals(memberId)){
+					found = true;
+				}
+			}
+			if(found == true){
+				System.out.println("This member ID already exists!");
+				System.out.print("Enter a new member ID: ");
+				memberId = input.nextLine();
+			}else{
+				break;
+			}
+		}
+		System.out.print("Enter Name: ");
+		name = input.nextLine();
+		
+		// Check phone number
+		while(true){
+			System.out.print("Enter Contact Number: ");
+			String temp = input.nextLine();
+			boolean isDigit = true;
+			if (temp.length() != 10){
+				System.out.println("Please enter valid phone number.");
+			}else{
+				for (int i = 0; i < temp.length(); i++) {
+					if (!Character.isDigit(temp.charAt(i))) {
+						isDigit = false;
+					}
+				}
+				if(isDigit){
+					contactNumber = temp;
+					break;
+				}else{
+					System.out.println("Please Enter valid phone number.");
+				}
+			}
+		}
+		// Check email
+		while(true){
+			System.out.print("Enter Email Address: ");
+			String temp = input.nextLine();
+			if(temp.contains("@") && temp.contains(".") && temp.indexOf("@") < temp.lastIndexOf(".")){
+				email = temp;
+				break;
+			}else{
+				System.out.println("Please Enter valid e-mail address.");
+			}
+		}
+		
+        // Create a tempory array and copy values from member array 
+		String[][] temp = new String[4][members[0].length+1];
+		for (int j=0;j<members.length;j++){
+			for(int i=0;i<members[j].length;i++){
+				temp[j][i] = members[j][i];
+			}
+		}
+
+        // Add values to the last elements
+		temp[0][temp[0].length-1] = memberId;
+		temp[1][temp[1].length-1] = name;
+		temp[2][temp[2].length-1] = contactNumber;
+		temp[3][temp[3].length-1] = email;
+
+        // Copy tempory array to the original members array
+		members = temp;
+		memberCount++;
+		System.out.println("Member added successfully.\n");
+	}
+
+    // Update Members
+    public static void updateMembers(Scanner input){
+		clearConsole();
+		String memberId;
+		input.nextLine();
+		System.out.print("Enter Member ID to update: ");
+		memberId = input.next();
+
+		// Find index of Entered member ID
+		int index = -1;
+		for(int i=0;i<members[0].length;i++){
+			if(members[0][i].equals(memberId)){
+				index = i;
+			}
+		}
+		if(index < 0){
+			System.out.println("Member not found.\n");
+		}else{
+			System.out.print("Enter new Name: ");
+			members[1][index] = input.nextLine();
+
+			// Check contact number
+			while(true){
+				boolean isDigit = true;
+				System.out.print("Enter new Contact Number: ");
+				String tempC = input.nextLine();
+				if(tempC.length() != 10){
+					System.out.println("Please enter valid phone number");
+				}else{
+					for (int i = 0; i < tempC.length(); i++) {
+						if (!Character.isDigit(tempC.charAt(i))) {
+							isDigit = false;
+						}
+					}
+					if(isDigit){
+						members[2][index] = tempC;
+						break;
+					}else{
+						System.out.println("Please enter valid phone number");
+					}
+				}
+			}
+			// Check E-mail address
+			while(true){
+				System.out.print("Enter new Email: ");
+				String tempE = input.nextLine();
+				if(tempE.contains("@") && tempE.contains(".") && tempE.indexOf("@") < tempE.lastIndexOf(".")){
+					members[3][index] = tempE;
+					break;
+				}else{
+					System.out.println("Please enter valid e-mail address.");
+				}
+			}
+			System.out.println("Member updated successfully.\n");
+		}
+	}
+
+    // Delete Members
+    public static void deleteMembers(Scanner input){
+		clearConsole();
+		String memberId;
+		input.nextLine();
+		System.out.print("Enter member ID to delete: ");
+		memberId = input.next();
+
+		// Find index of Entered member ID
+		int index = -1;
+		for(int i=0;i<members[0].length;i++){
+			if(members[0][i].equals(memberId)){
+				index = i;
+			}
+		}
+		if(index < 0){
+			System.out.println("Member not found.\n");
+		}else{
+			String[][] temp = new String[5][members[0].length-1];
+			for(int j=0;j<members.length;j++){
+				for(int i=0;i<temp[j].length;i++){
+					if(i >= index){
+						temp[j][i] = members[j][i+1];
+					}else{
+						temp[j][i] = members[j][i];
+					}
+				}
+			}
+			members = temp;
+            memberCount--;
+			System.out.println("Member deleted successfully.\n");
+		}
+	}
+
+    // Find members
+    public static void searchMembers(Scanner input){
+		clearConsole();
+		String memberId;
+		input.nextLine();
+		System.out.print("Enter member ID to search: ");
+		memberId = input.next();
+
+		// Find index of Entered member ID
+		int index = -1;
+		for(int i=0;i<members[0].length;i++){
+			if(members[0][i].equals(memberId)){
+				index = i;
+			}
+		}
+		if(index < 0){
+			System.out.println("Member not found.\n");
+		}else{
+			System.out.println("\nMember Details:");
+			System.out.println("ID: " + members[0][index]);
+			System.out.println("Name: " + members[1][index]);
+			System.out.println("Contact: " + members[2][index]);
+			System.out.println("Email: " + members[3][index] + "\n");
+		}
+	}
+
+    // View All Members
+    public static void viewAllMembers(){
+		clearConsole();
+		if(memberCount == 0){
+			System.out.println("Catalog is empty.\n");
+		}else{
+			System.out.println("\t\t\t\t\t--- All Members ---");
+			System.out.println("Member ID\t\t\tName\t\t\tContact Number\t\t\tEmail");
+			System.out.println();
+			for(int j=0;j<members[0].length;j++){
+				for(int i=0;i<members.length;i++){
+					System.out.print(members[i][j]+"\t\t\t");
+				}
+				System.out.println();
+			}
+		}
+	}
+
+	// Issue Books
+	public static void issueBooks(Scanner input){
+		clearConsole();
+		while(true){
+			int bookIndex = 0;
+			System.out.print("Enter member ID: ");
+			String memberId = input.next();
+			boolean found = false;
+			for(int i=0;i<members[0].length;i++){
+				if(members[0][i].equals(memberId)){
+					found = true;
+				}
+			}
+			if(found){
+				System.out.print("Enter book ID: ");
+				String bookId = input.next();
+				boolean foundBook = false;
+				for(int j=0;j<books[0].length;j++){
+					if(books[0][j].equals(bookId)){
+						foundBook = true;
+						bookIndex = j;
+					}
+				}
+				if(foundBook){
+					if(Integer.parseInt(books[4][bookIndex])>0){
+						input.nextLine();
+						System.out.print("Enter Due Date (YYYY-MM-DD): ");
+						String tempDueDate = input.nextLine();
+						String dueDate;
+						if(tempDueDate.contains("-") && tempDueDate.charAt(7) == '-' && tempDueDate.length() == 10){
+							dueDate = tempDueDate;
+						}else{
+							System.out.println("Enter due date in valid format.\n");
+							continue;
+						}
+						int quantity = Integer.parseInt(books[4][bookIndex]);
+						quantity-=1;
+						books[4][bookIndex] = Integer.toString(quantity);
+						String[][] temp = new String[3][issuedBooks[0].length+1];
+						for(int i=0;i<temp.length;i++){
+							for(int j=0;j<issuedBooks[0].length;j++){
+								temp[i][j] = issuedBooks[i][j];
+							}
+						}
+						temp[0][temp[0].length-1] = memberId;
+						temp[1][temp[0].length-1] = bookId;
+						temp[2][temp[0].length-1] = dueDate;
+						issuedBooks = temp;
+						clearConsole();
+						System.out.println("Book issued successfully.");
+						System.out.println("1. Issue Another Book");
+						System.out.println("2. Back to Home");
+						System.out.print("Select an option: ");
+						int option = input.nextInt();
+						input.nextLine();
+						switch (option) {
+							case 1:
+								clearConsole();
+								break;
+							case 2:
+								clearConsole();
+								return;
+							default:
+								clearConsole();
+								break;
+						}
+					}else{
+						clearConsole();
+						System.out.println("This book not available!");
+						System.out.println("1. Try Again");
+						System.out.println("2. Back to Home");
+						System.out.print("Select an option: ");
+						int option = input.nextInt();
+						input.nextLine();
+						switch (option) {
+							case 1:
+								clearConsole();
+								break;
+							case 2:
+								clearConsole();
+								return;
+							default:
+								clearConsole();
+								break;
+						}
+					}
+				}else{
+					clearConsole();
+					System.out.println("Invalid Book ID.");
+					System.out.println("1. Try Again");
+					System.out.println("2. Back to Home");
+					System.out.print("Select an option: ");
+					int option = input.nextInt();
+					switch (option) {
+						case 1:
+							clearConsole();
+							break;
+						case 2:
+							clearConsole();
+							return;
+						default:
+							clearConsole();
+							break;
+					}
+				}
+			}else{
+				clearConsole();
+				System.out.println("Invalid Member ID.");
+				System.out.println("1. Try Again");
+				System.out.println("2. Back to Home");
+				System.out.print("Select an option: ");
+				int option = input.nextInt();
+				switch (option) {
+					case 1:
+						clearConsole();
+						break;
+					case 2:
+						clearConsole();
+						return;
+					default:
+						clearConsole();
+						break;
+				}
+			}
+		}
+	}
+
+	// Return Books
+	public static void returnBooks(Scanner input){
+		clearConsole();
+		if(issuedBooks[0].length !=0){
+		while(true){
+			System.out.print("Enter Member ID: ");
+			int indexBooksArray = 0;
+			int indexIssuedBooksArray = 0;
+			String memberId = input.next();
+			boolean foundMemberId = false;
+			for(int i=0;i<members[0].length;i++){
+				if(members[0][i].equals(memberId)){
+					foundMemberId = true;
+				}
+			}
+			if(foundMemberId){
+				
+				System.out.print("Enter Book ID: ");
+				String bookId = input.next();
+				boolean foundBookId = false;
+				for(int i=0;i<books[0].length;i++){
+					if(books[0][i].equals(bookId)){
+						indexBooksArray = i;
+						foundBookId = true;
+					}
+				}
+				if(foundBookId){
+					boolean found = false;
+					for(int i=0;i<issuedBooks[0].length;i++){
+						if(issuedBooks[0][i].equals(memberId) && issuedBooks[1][i].equals(bookId)){
+							found = true;
+							indexIssuedBooksArray = i;
+						}
+					}
+					if(found){
+						int quantity = Integer.parseInt(books[4][indexBooksArray]);
+						quantity+=1;
+						books[4][indexBooksArray] = Integer.toString(quantity);
+						String[][] temp = new String[3][issuedBooks[0].length-1];
+						for(int j=0;j<temp.length;j++){
+							for(int i=0;i<temp[0].length;i++){
+								if(i < indexIssuedBooksArray){
+									temp[j][i] = issuedBooks[j][i];
+								}else{
+									temp[j][i] = issuedBooks[j][i+1];
+								}
+							}
+						}
+						issuedBooks = temp;
+						System.out.println("Book returned successfully.");
+						System.out.println("1. Return Another Book");
+						System.out.println("2. Back to Home");
+						System.out.print("Select an option: ");
+						int option = input.nextInt();
+						input.nextLine();
+						switch (option) {
+							case 1:
+								clearConsole();
+								break;
+							case 2:
+								clearConsole();
+								return;
+							default :
+								clearConsole();
+								break;
+						}
+					}else{
+						System.out.println("No record found for the given Member ID and BookID.\n");
+						break;
+					}
+				}else{
+					System.out.println("Invalid Book ID");
+				}
+			}else{
+				System.out.println("Invalid Member ID");
+			}
+		}	
+		}else{
+			System.out.println("No issued books.\n");
+			return;
+		}
+	}
+
+	// Overdue Books
+	public static void overDueBooks(Scanner input){
+		clearConsole();
+		//Array - Overdue Books
+		String[][] overDueBooks = new String[5][0];
+		while(true){
+			System.out.print("Enter date of today (YYYY-MM-DD): ");
+			String dateToday = input.nextLine();
+			if(dateToday.contains("-") && dateToday.charAt(7) == '-' && dateToday.length() == 10){
+				// Get today month
+				char tm1 = dateToday.charAt(5);
+				char tm2 = dateToday.charAt(6);
+				String tm = ""+tm1+tm2;
+				int todayMonth = Integer.parseInt(tm);
+
+				// Get today date
+				char td1 = dateToday.charAt(8);
+				char td2 = dateToday.charAt(9);
+				String td = ""+td1+td2;
+				int today = Integer.parseInt(td);
+
+				int daysOverdue = 0;
+				int overDueBookCount = 0;
+
+				for(int i=0;i<issuedBooks[0].length;i++){
+					String dueDate = issuedBooks[2][i];
+
+					// Get overdue month
+					char dm1 = dueDate.charAt(5);
+					char dm2 = dueDate.charAt(6);
+					String dm = ""+dm1+dm2;
+					int monthDue = Integer.parseInt(dm);
+
+					// Get overdue date
+					char dd1 = dueDate.charAt(8);
+					char dd2 = dueDate.charAt(9);
+					String dd = ""+dd1+dd2;
+					int dateDue = Integer.parseInt(dd);
+
+					int monthOverdue;
+					if(today<dateDue){
+						todayMonth-=1;
+						today += 30;
+						daysOverdue = today-dateDue;
+						monthOverdue = todayMonth - monthDue;
+						daysOverdue = daysOverdue + monthOverdue*30;
+					}else{
+						daysOverdue = today-dateDue;
+						monthOverdue = todayMonth - monthDue;
+						daysOverdue = daysOverdue + monthOverdue*30;
+					}
+					if(daysOverdue > 0 ){
+						String memberId = issuedBooks[0][i];
+						String bookId = issuedBooks[1][i];
+						double fineAmount = daysOverdue * 50;
+						
+						String[][] temp = new String[5][overDueBooks[0].length+1];
+						for(int j=0;j<overDueBooks.length;j++){
+							for(int k=0;k<overDueBooks[0].length;k++){
+								temp[j][k] = overDueBooks[j][k];
+							}
+						}
+						temp[0][temp[0].length-1] = bookId;
+						temp[1][temp[0].length-1] = memberId;
+						temp[2][temp[0].length-1] = dueDate;
+						temp[3][temp[0].length-1] = Integer.toString(daysOverdue);
+						temp[4][temp[0].length-1] = Double.toString(fineAmount);
+						overDueBooks = temp;
+						overDueBookCount++;
+					}
+				}
+				if(overDueBookCount !=0 ){
+					System.out.println("BookID\t\tMember Id\tDue date\tDays overdue\t\tFine");
+					for(int i=0;i<overDueBooks[0].length;i++){
+						for(int j=0;j<overDueBooks.length;j++){
+							System.out.print(overDueBooks[j][i]+"\t\t");
+						}
+						System.out.println("\b\b\b\b\b\b\b\b\bLKR");
+					}
+					return;
+				}else{
+					clearConsole();
+					System.out.println("No overdue books.\n");
+					return;
+				}
+			}else{
+				System.out.println("Enter date in valid format.\n");
+				continue;
+			}
+		}
+	}
+
+	// Book Issued Per Member
+	public static void booksIssuedPerMember(){
+		clearConsole();
+		//Arrays - booksIssuedPerMember
+		String[] uniqueMember = new String[issuedBooks[0].length];
+		int[] uniqueBookCount = new int[issuedBooks[0].length];
+		if(issuedBooks[0].length == 0){
+			System.out.println("No issued books.\n");
+		}else{
+			int uniqueCount = 0;
+			for(int i=0;i<issuedBooks[0].length;i++){
+				boolean found = false;
+				int index = 0;
+				for(int j=0;j<uniqueCount;j++){
+					if(issuedBooks[0][i].equals(uniqueMember[j])){
+						found = true;
+						index = j;
+					}
+				}
+				if(!found){
+					uniqueMember[uniqueCount] = issuedBooks[0][i];
+					uniqueBookCount[uniqueCount] = 1;
+					uniqueCount++;
+					
+				}else{
+					uniqueBookCount[index]++;
+				}
+			}
+			System.out.println("MemberID\tBook Count");
+			for(int i=0;i<uniqueCount;i++){
+				System.out.print(uniqueMember[i] + "\t\t");
+				System.out.println(uniqueBookCount[i]);
+			}
+		}
+	}
+
+    // Clear console
+    private final static void clearConsole() {
+        final String os = System.getProperty("os.name");
+        try {
+        if (os.contains("Linux")) {
+        System.out.print("\033\143");
+        } else if (os.contains("Windows")) {
+        new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+        }
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+        } catch (final Exception e) {
+        // Handle the exception
+        System.err.println(e.getMessage());
+        }
+       }
 
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
-        login(input);
-        showHomeMenu(input);
-    }
+        
+        // Username and password for login to the system
+        final String username = "admin";
+        final String password = "admin123";
 
-    // Login method
-    public static void login(Scanner input) {
-        String USERNAME = "admin";
-        String PASSWORD = "1234";
-        while (true) {
+        // Enter Username and Password for Login to the System
+        while(true){
+            String loginUsername;
+            String loginPassword;
             System.out.print("Enter Username: ");
-            String user = input.nextLine();
+            loginUsername = input.nextLine();
             System.out.print("Enter Password: ");
-            String pass = input.nextLine();
-            if (user.equals(USERNAME) && pass.equals(PASSWORD)) {
-                System.out.println("Login successful!");
+            loginPassword = input.nextLine();
+    
+            // Check Credentials
+            if(loginUsername.equals(username) && loginPassword.equals(password)){
                 break;
-            } else {
-                System.out.println("Wrong username or password. Try again.\n");
+            }else{
+                System.out.println("Invalid credentials. Try again.");
+                continue;
             }
         }
-    }
-
-    // Home Menu
-    public static void showHomeMenu(Scanner input) {
-        while (true) {
-            System.out.println("=== 📚 LibraryPro - Home Page ===");
+        clearConsole();
+        // Home page
+        while(true){
+            System.out.println("--- Library Management System ---");
             System.out.println("1. Manage Books");
             System.out.println("2. Manage Members");
             System.out.println("3. Issue Books");
             System.out.println("4. Return Books");
-            System.out.println("5. View Reports");
+            System.out.println("5. view Reports");
             System.out.println("6. Exit System");
-            System.out.print("Select an option (1-6): ");
+            System.out.print("Select an option: ");
+            int optionHomePage = input.nextInt();
 
-            String choice = input.nextLine();
+            switch (optionHomePage) {
+                case 1:
+                    // Manage Books
+                    clearConsole();
+                    while(true){
+                        System.out.println("--- Manage Books ---");
+                        System.out.println("1. Add Book");
+                        System.out.println("2. Update Book");
+                        System.out.println("3. Delete Book");
+                        System.out.println("4. Search Book");
+                        System.out.println("5. View All Books");
+                        System.out.println("6. Back to Home");
+                        System.out.print("Select an option: ");
+                        int optionManageBooks = input.nextInt();
 
-            switch (choice) {
-                case "1":
-                    manageBooksMenu(input);
+                        switch (optionManageBooks) {
+                        case 1:
+                            // Add Books
+                            addBooks(input);
+                            break;
+                        case 2:
+                            // Update Books
+                            updateBooks(input);
+                            break;
+                        case 3:
+                            // Delete Books
+                            deleteBooks(input);
+                            break;
+                        case 4:
+                            // Find Books
+                            searchBooks(input);
+                            break;
+                        case 5:
+                            // View All Books
+                            viewAllBooks();
+                            break;
+                        case 6:
+                            // Back to Home
+                            clearConsole();
+                            break;
+                        default:
+                            clearConsole();
+                            System.out.println("Enter valid number");
+                            break;
+                        }
+                        if(optionManageBooks == 6){
+                            break;
+                        }
+                    }
                     break;
-                case "2":
-                    manageMembersMenu(input);
+                case 2:
+                    // Manage Members
+                    clearConsole();
+                    while(true){
+                        System.out.println("--- Manage Members ---");
+                        System.out.println("1. Add Member");
+                        System.out.println("2. Update Member");
+                        System.out.println("3. Delete Member");
+                        System.out.println("4. Search Member");
+                        System.out.println("5. View All Member");
+                        System.out.println("6. Back to Home");
+                        System.out.print("Select an option: ");
+                        int optionManageMembers = input.nextInt();
+
+                        switch (optionManageMembers) {
+                        case 1:
+                            // Add Members
+                            addMembers(input);
+                            break;
+                        case 2:
+                            // Update Books
+                            updateMembers(input);
+                            break;
+                        case 3:
+                            // Delete Books
+                            deleteMembers(input);
+                            break;
+                        case 4:
+                            // Find Books
+                            searchMembers(input);
+                            break;
+                        case 5:
+                            // View All Books
+                            viewAllMembers();
+                            break;
+                        case 6:
+                            // Back to Home
+                            clearConsole();
+                            break;
+                        default:
+                            clearConsole();
+                            System.out.println("Enter valid number");
+                            break;
+                        }
+                        if(optionManageMembers == 6){
+                            break;
+                        }
+                    }
                     break;
-                case "3":
-                    issueBook(input);
+                case 3:
+					// Issue Books
+					issueBooks(input);
                     break;
-                case "4":
-                    returnBook(input);
+                case 4:
+					// Return Books
+					returnBooks(input);
                     break;
-                case "5":
-                    viewReportsMenu(input);
+                case 5:
+					// Reports
+					System.out.println("\n--- Reports ---");
+					System.out.println("1. Overdue Books");
+					System.out.println("2. Books Issued Per Member");
+					System.out.print("Select an option: ");
+					int option = input.nextInt();
+					input.nextLine();
+					switch (option) {
+						case 1:
+							// Overdue Books
+							overDueBooks(input);
+							break;
+						case 2:
+							// Book Issued Per Member
+							booksIssuedPerMember();
+							break;
+						default:
+							System.out.println("\nEnter valid number.\n");
+							break;
+					}
                     break;
-                case "6":
-                    System.out.println("👋 Exiting system. Goodbye!");
-                    System.exit(0);
-                default:
-                    System.out.println("❌ Invalid option. Please try again.\n");
+                case 6:
+                    clearConsole();
+                    break;
+                default :
+                    clearConsole();
+                    System.out.println("Enter valid number");
+                    break;
             }
-        }
-    }
-
-    // ===================== Manage Books =====================
-    public static void manageBooksMenu(Scanner input) {
-        while (true) {
-            System.out.println("\n=== 📚 Manage Books ===");
-            System.out.println("1. Add Book");
-            System.out.println("2. Update Book");
-            System.out.println("3. Delete Book");
-            System.out.println("4. Search Book");
-            System.out.println("5. View All Books");
-            System.out.println("6. Back to Home");
-            System.out.print("Select an option (1-6): ");
-
-            String choice = input.nextLine();
-
-            switch (choice) {
-                case "1":
-                    addBook(input);
-                    break;
-                case "2":
-                    updateBook(input);
-                    break;
-                case "3":
-                    deleteBook(input);
-                    break;
-                case "4":
-                    searchBook(input);
-                    break;
-                case "5":
-                    viewAllBooks();
-                    break;
-                case "6":
-                    return;
-                default:
-                    System.out.println("❌ Invalid option. Please try again.\n");
-            }
-        }
-    }
-
-    public static void addBook(Scanner input) {
-        System.out.println("\n--- 📘 Add New Book ---");
-        System.out.print("Enter Book ID: ");
-        String bookID = input.nextLine();
-        if (findBookIndexByID(bookID) != -1) {
-            System.out.println("❌ Book ID already exists. Try again.\n");
-            return;
-        }
-        System.out.print("Enter Title: ");
-        String title = input.nextLine();
-        System.out.print("Enter Author: ");
-        String author = input.nextLine();
-        System.out.print("Enter Genre: ");
-        String genre = input.nextLine();
-        System.out.print("Enter Quantity: ");
-        String quantity = input.nextLine();
-        try {
-            int q = Integer.parseInt(quantity);
-            if (q <= 0) {
-                System.out.println("❌ Quantity must be a positive number.\n");
-                return;
-            }
-        } catch (Exception e) {
-            System.out.println("❌ Quantity must be a valid number.\n");
-            return;
-        }
-        books[bookCount][0] = bookID;
-        books[bookCount][1] = title;
-        books[bookCount][2] = author;
-        books[bookCount][3] = genre;
-        books[bookCount][4] = quantity;
-        bookCount++;
-        System.out.println("✅ Book added successfully!\n");
-    }
-
-    public static void updateBook(Scanner input) {
-        System.out.println("\n--- ✏️ Update Book ---");
-        System.out.print("Enter Book ID to update: ");
-        String bookID = input.nextLine();
-        int index = findBookIndexByID(bookID);
-        if (index == -1) {
-            System.out.println("❌ Book ID not found. Returning to menu.\n");
-            return;
-        }
-        System.out.println("Current details:");
-        System.out.println("Book ID: " + books[index][0]);
-        System.out.println("Title: " + books[index][1]);
-        System.out.println("Author: " + books[index][2]);
-        System.out.println("Genre: " + books[index][3]);
-        System.out.println("Quantity: " + books[index][4]);
-        System.out.print("Enter new Title: ");
-        String title = input.nextLine();
-        System.out.print("Enter new Author: ");
-        String author = input.nextLine();
-        System.out.print("Enter new Genre: ");
-        String genre = input.nextLine();
-        System.out.print("Enter new Quantity: ");
-        String quantity = input.nextLine();
-        try {
-            int q = Integer.parseInt(quantity);
-            if (q <= 0) {
-                System.out.println("❌ Quantity must be a positive number.\n");
-                return;
-            }
-        } catch (Exception e) {
-            System.out.println("❌ Quantity must be a valid number.\n");
-            return;
-        }
-        books[index][1] = title;
-        books[index][2] = author;
-        books[index][3] = genre;
-        books[index][4] = quantity;
-        System.out.println("✅ Book updated successfully!\n");
-    }
-
-    public static void deleteBook(Scanner input) {
-        System.out.println("\n--- 🗑️ Delete Book ---");
-        System.out.print("Enter Book ID to delete: ");
-        String bookID = input.nextLine();
-        int index = findBookIndexByID(bookID);
-        if (index == -1) {
-            System.out.println("❌ Book ID not found. Returning to menu.\n");
-            return;
-        }
-        for (int i = index; i < bookCount - 1; i++) {
-            for (int j = 0; j < 5; j++) {
-                books[i][j] = books[i + 1][j];
-            }
-        }
-        for (int j = 0; j < 5; j++) books[bookCount - 1][j] = null;
-        bookCount--;
-        System.out.println("✅ Book deleted successfully!\n");
-    }
-
-    public static void searchBook(Scanner input) {
-        System.out.println("\n--- 🔍 Search Book ---");
-        System.out.print("Enter Book ID to search: ");
-        String bookID = input.nextLine();
-        int index = findBookIndexByID(bookID);
-        if (index == -1) {
-            System.out.println("❌ Book ID not found.\n");
-            return;
-        }
-        System.out.println("Book found:");
-        System.out.println("Book ID: " + books[index][0]);
-        System.out.println("Title: " + books[index][1]);
-        System.out.println("Author: " + books[index][2]);
-        System.out.println("Genre: " + books[index][3]);
-        System.out.println("Quantity: " + books[index][4]);
-        System.out.println();
-    }
-
-    public static void viewAllBooks() {
-        System.out.println("\n--- 📚 All Books in Catalog ---");
-        if (bookCount == 0) {
-            System.out.println("No books in the catalog.\n");
-            return;
-        }
-        System.out.printf("%-10s %-25s %-20s %-15s %-8s\n", "Book ID", "Title", "Author", "Genre", "Quantity");
-        System.out.println("--------------------------------------------------------------------------------");
-        for (int i = 0; i < bookCount; i++) {
-            System.out.printf("%-10s %-25s %-20s %-15s %-8s\n",
-                    books[i][0], books[i][1], books[i][2], books[i][3], books[i][4]);
-        }
-        System.out.println();
-    }
-
-    // ===================== Manage Members =====================
-    public static void manageMembersMenu(Scanner input) {
-        while (true) {
-            System.out.println("\n=== 👥 Manage Members ===");
-            System.out.println("1. Add Member");
-            System.out.println("2. Update Member");
-            System.out.println("3. Delete Member");
-            System.out.println("4. Search Member");
-            System.out.println("5. View All Members");
-            System.out.println("6. Back to Home");
-            System.out.print("Select an option (1-6): ");
-
-            String choice = input.nextLine();
-
-            switch (choice) {
-                case "1":
-                    addMember(input);
-                    break;
-                case "2":
-                    updateMember(input);
-                    break;
-                case "3":
-                    deleteMember(input);
-                    break;
-                case "4":
-                    searchMember(input);
-                    break;
-                case "5":
-                    viewAllMembers();
-                    break;
-                case "6":
-                    return;
-                default:
-                    System.out.println("❌ Invalid option. Please try again.\n");
-            }
-        }
-    }
-
-    public static void addMember(Scanner input) {
-        System.out.println("\n--- 🆕 Add New Member ---");
-        String memberID;
-        while (true) {
-            System.out.print("Enter Member ID: ");
-            memberID = input.nextLine();
-            if (findMemberIndexByID(memberID) != -1) {
-                System.out.println("❌ Member ID already exists. Please enter a unique Member ID.");
-            } else {
+            if(optionHomePage == 6){
                 break;
             }
         }
-        System.out.print("Enter Name: ");
-        String name = input.nextLine();
-        String contactNumber;
-        while (true) {
-            System.out.print("Enter Contact Number: ");
-            contactNumber = input.nextLine();
-            if (isValidPhoneNumber(contactNumber)) break;
-            else System.out.println("❌ Invalid phone number format. Please enter a valid phone number.");
-        }
-        String email;
-        while (true) {
-            System.out.print("Enter Email: ");
-            email = input.nextLine();
-            if (isValidEmail(email)) break;
-            else System.out.println("❌ Invalid email format. Please enter a valid email address.");
-        }
-        members[memberCount][0] = memberID;
-        members[memberCount][1] = name;
-        members[memberCount][2] = contactNumber;
-        members[memberCount][3] = email;
-        memberCount++;
-        System.out.println("✅ Member added successfully!\n");
-    }
-
-    public static void updateMember(Scanner input) {
-        System.out.println("\n--- ✏️ Update Member ---");
-        System.out.print("Enter Member ID to update: ");
-        String memberID = input.nextLine();
-        int index = findMemberIndexByID(memberID);
-        if (index == -1) {
-            System.out.println("❌ Member ID not found. Returning to menu.\n");
-            return;
-        }
-        System.out.println("Current details:");
-        System.out.println("Member ID: " + members[index][0]);
-        System.out.println("Name: " + members[index][1]);
-        System.out.println("Contact Number: " + members[index][2]);
-        System.out.println("Email: " + members[index][3]);
-        System.out.print("Enter new Name: ");
-        String name = input.nextLine();
-        String contactNumber;
-        while (true) {
-            System.out.print("Enter new Contact Number: ");
-            contactNumber = input.nextLine();
-            if (isValidPhoneNumber(contactNumber)) break;
-            else System.out.println("❌ Invalid phone number format. Please enter a valid phone number.");
-        }
-        String email;
-        while (true) {
-            System.out.print("Enter new Email: ");
-            email = input.nextLine();
-            if (isValidEmail(email)) break;
-            else System.out.println("❌ Invalid email format. Please enter a valid email address.");
-        }
-        members[index][1] = name;
-        members[index][2] = contactNumber;
-        members[index][3] = email;
-        System.out.println("✅ Member updated successfully!\n");
-    }
-
-    public static void deleteMember(Scanner input) {
-        System.out.println("\n--- 🗑️ Delete Member ---");
-        System.out.print("Enter Member ID to delete: ");
-        String memberID = input.nextLine();
-        int index = findMemberIndexByID(memberID);
-        if (index == -1) {
-            System.out.println("❌ Member ID not found. Returning to menu.\n");
-            return;
-        }
-        for (int i = index; i < memberCount - 1; i++) {
-            for (int j = 0; j < 4; j++) {
-                members[i][j] = members[i + 1][j];
-            }
-        }
-        for (int j = 0; j < 4; j++) members[memberCount - 1][j] = null;
-        memberCount--;
-        System.out.println("✅ Member deleted successfully!\n");
-    }
-
-    public static void searchMember(Scanner input) {
-        System.out.println("\n--- 🔍 Search Member ---");
-        System.out.print("Enter Member ID to search: ");
-        String memberID = input.nextLine();
-        int index = findMemberIndexByID(memberID);
-        if (index == -1) {
-            System.out.println("❌ Member ID not found.\n");
-            return;
-        }
-        System.out.println("Member found:");
-        System.out.println("Member ID: " + members[index][0]);
-        System.out.println("Name: " + members[index][1]);
-        System.out.println("Contact Number: " + members[index][2]);
-        System.out.println("Email: " + members[index][3]);
-        System.out.println();
-    }
-
-    public static void viewAllMembers() {
-        System.out.println("\n--- 👥 All Registered Members ---");
-        if (memberCount == 0) {
-            System.out.println("No members registered in the system.\n");
-            return;
-        }
-        System.out.printf("%-12s %-25s %-15s %-30s\n", "Member ID", "Name", "Contact Number", "Email");
-        System.out.println("--------------------------------------------------------------------------------");
-        for (int i = 0; i < memberCount; i++) {
-            System.out.printf("%-12s %-25s %-15s %-30s\n",
-                    members[i][0], members[i][1], members[i][2], members[i][3]);
-        }
-        System.out.println();
-    }
-
-    // ===================== Issue Book =====================
-    public static void issueBook(Scanner input) {
-        System.out.println("\n--- 📖 Issue Book ---");
-        System.out.print("Enter Member ID: ");
-        String memberID = input.nextLine();
-        int memberIdx = findMemberIndexByID(memberID);
-        if (memberIdx == -1) {
-            System.out.println("❌ Member ID does not exist. Cannot issue book.\n");
-            return;
-        }
-        System.out.print("Enter Book ID: ");
-        String bookID = input.nextLine();
-        int bookIdx = findBookIndexByID(bookID);
-        if (bookIdx == -1) {
-            System.out.println("❌ Book ID does not exist. Cannot issue book.\n");
-            return;
-        }
-        int qty = Integer.parseInt(books[bookIdx][4]);
-        if (qty <= 0) {
-            System.out.println("❌ Book is not available for issue (quantity is 0).\n");
-            return;
-        }
-        System.out.print("Enter Due Date (yyyy-MM-dd): ");
-        String dueDate = input.nextLine();
-        if (!isValidDateFormat(dueDate)) {
-            System.out.println("❌ Invalid date format. Please use yyyy-MM-dd.\n");
-            return;
-        }
-        books[bookIdx][4] = String.valueOf(qty - 1);
-        issuedBooks[issuedCount][0] = bookID;
-        issuedBooks[issuedCount][1] = memberID;
-        issuedBooks[issuedCount][2] = dueDate;
-        issuedCount++;
-        System.out.println("✅ Book issued successfully! Due Date: " + dueDate + "\n");
-    }
-
-    // ===================== Return Book =====================
-    public static void returnBook(Scanner input) {
-        System.out.println("\n--- 📕 Return Book ---");
-        System.out.print("Enter Member ID: ");
-        String memberID = input.nextLine();
-        int memberIdx = findMemberIndexByID(memberID);
-        if (memberIdx == -1) {
-            System.out.println("Invalid Member ID.\n");
-            return;
-        }
-        System.out.print("Enter Book ID: ");
-        String bookID = input.nextLine();
-        int bookIdx = findBookIndexByID(bookID);
-        if (bookIdx == -1) {
-            System.out.println("Book ID does not exist.\n");
-            return;
-        }
-        int issuedIdx = findIssuedBookIndex(bookID, memberID);
-        if (issuedIdx == -1) {
-            System.out.println("No record found for the given Member ID and Book ID.\n");
-            return;
-        }
-
-        String dueDateStr = issuedBooks[issuedIdx][2];
-        System.out.print("Enter current date (yyyy-MM-dd): ");
-        String currentDateStr = input.nextLine();
-        if (!isValidDateFormat(currentDateStr)) {
-            System.out.println("Invalid date format. Please use yyyy-MM-dd.\n");
-            return;
-        }
-
-        int dueDays = dateToDays(dueDateStr);
-        int currentDays = dateToDays(currentDateStr);
-        if (dueDays == -1 || currentDays == -1) {
-            System.out.println("Error parsing dates. Cannot calculate fine.\n");
-            return;
-        }
-
-        int overdueDays = currentDays - dueDays;
-        int fine = 0;
-        if (overdueDays > 0) {
-            fine = overdueDays * 50; // 50 LKR per day
-        }
-
-        // Increase book quantity by 1
-        int qty = Integer.parseInt(books[bookIdx][4]);
-        books[bookIdx][4] = String.valueOf(qty + 1);
-
-        // Remove issued book record by shifting
-        for (int i = issuedIdx; i < issuedCount - 1; i++) {
-            for (int j = 0; j < 3; j++) {
-                issuedBooks[i][j] = issuedBooks[i + 1][j];
-            }
-        }
-        for (int j = 0; j < 3; j++) issuedBooks[issuedCount - 1][j] = null;
-        issuedCount--;
-
-        System.out.println("Book returned successfully.");
-        if (fine > 0) {
-            System.out.println("Overdue fine: " + fine + " LKR (" + overdueDays + " days overdue)");
-        } else {
-            System.out.println("No overdue fine.");
-        }
-        System.out.println();
-    }
-
-    // ===================== View Reports =====================
-    public static void viewReportsMenu(Scanner input) {
-        while (true) {
-            System.out.println("\n=== 📊 View Reports ===");
-            System.out.println("1. Overdue Books");
-            System.out.println("2. Books Issued Per Member");
-            System.out.println("3. Back to Home");
-            System.out.print("Select an option (1-3): ");
-
-            String choice = input.nextLine();
-
-            switch (choice) {
-                case "1":
-                    reportOverdueBooks(input);
-                    break;
-                case "2":
-                    reportBooksIssuedPerMember();
-                    break;
-                case "3":
-                    return;
-                default:
-                    System.out.println("❌ Invalid option. Please try again.\n");
-            }
-        }
-    }
-
-    // Report 1: Overdue Books
-    public static void reportOverdueBooks(Scanner input) {
-        if (issuedCount == 0) {
-            System.out.println("\nNo books are currently issued.\n");
-            return;
-        }
-        System.out.print("Enter current date (yyyy-MM-dd) to check overdue books: ");
-        String currentDateStr = input.nextLine();
-        if (!isValidDateFormat(currentDateStr)) {
-            System.out.println("❌ Invalid date format. Please use yyyy-MM-dd.\n");
-            return;
-        }
-        int currentDays = dateToDays(currentDateStr);
-        if (currentDays == -1) {
-            System.out.println("❌ Error parsing current date.\n");
-            return;
-        }
-        boolean foundOverdue = false;
-        System.out.println("\n--- 📋 Overdue Books ---");
-        System.out.printf("%-10s %-12s %-12s %-12s %-10s\n", "Book ID", "Member ID", "Due Date", "Days Overdue", "Fine ($)");
-        System.out.println("--------------------------------------------------------------");
-        for (int i = 0; i < issuedCount; i++) {
-            String bookID = issuedBooks[i][0];
-            String memberID = issuedBooks[i][1];
-            String dueDateStr = issuedBooks[i][2];
-            int dueDays = dateToDays(dueDateStr);
-            if (dueDays == -1) continue;
-            int overdueDays = currentDays - dueDays;
-            if (overdueDays > 0) {
-                foundOverdue = true;
-                double fine = overdueDays * 0.50;
-                System.out.printf("%-10s %-12s %-12s %-12d $%-9.2f\n", bookID, memberID, dueDateStr, overdueDays, fine);
-            }
-        }
-        if (!foundOverdue) {
-            System.out.println("No overdue books found.\n");
-        } else {
-            System.out.println();
-        }
-    }
-
-    // Report 2: Books Issued Per Member
-    public static void reportBooksIssuedPerMember() {
-        if (memberCount == 0) {
-            System.out.println("\nNo members registered.\n");
-            return;
-        }
-        if (issuedCount == 0) {
-            System.out.println("\nNo books are currently issued.\n");
-            return;
-        }
-        System.out.println("\n--- 📋 Books Issued Per Member ---");
-        System.out.printf("%-12s %-25s %-10s\n", "Member ID", "Name", "Books Issued");
-        System.out.println("------------------------------------------------");
-        for (int i = 0; i < memberCount; i++) {
-            String memberID = members[i][0];
-            String name = members[i][1];
-            int count = 0;
-            for (int j = 0; j < issuedCount; j++) {
-                if (issuedBooks[j][1].equals(memberID)) {
-                    count++;
-                }
-            }
-            System.out.printf("%-12s %-25s %-10d\n", memberID, name, count);
-        }
-        System.out.println();
-    }
-
-    // ===================== Helpers =====================
-
-    public static int findBookIndexByID(String bookID) {
-        for (int i = 0; i < bookCount; i++) {
-            if (books[i][0].equals(bookID)) return i;
-        }
-        return -1;
-    }
-
-    public static int findMemberIndexByID(String memberID) {
-        for (int i = 0; i < memberCount; i++) {
-            if (members[i][0].equals(memberID)) return i;
-        }
-        return -1;
-    }
-
-    public static int findIssuedBookIndex(String bookID, String memberID) {
-        for (int i = 0; i < issuedCount; i++) {
-            if (issuedBooks[i][0].equals(bookID) && issuedBooks[i][1].equals(memberID)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    public static boolean isValidPhoneNumber(String phone) {
-        return phone.matches("\\d{7,15}");
-    }
-
-    public static boolean isValidEmail(String email) {
-        String emailRegex = "^[\\w.-]+@[\\w.-]+\\.[A-Za-z]{2,6}$";
-        return Pattern.matches(emailRegex, email);
-    }
-
-    public static boolean isValidDateFormat(String date) {
-        return date.matches("\\d{4}-\\d{2}-\\d{2}");
-    }
-
-    public static int dateToDays(String date) {
-        String[] parts = date.split("-");
-        if (parts.length != 3) return -1;
-        try {
-            int year = Integer.parseInt(parts[0]);
-            int month = Integer.parseInt(parts[1]);
-            int day = Integer.parseInt(parts[2]);
-            if (month < 1 || month > 12 || day < 1 || day > 31) return -1;
-            return year * 365 + month * 30 + day;
-        } catch (Exception e) {
-            return -1;
-        }
-    }
-
-    // Optional: Clear console method (not mandatory)
-    private final static void clearConsole() {
-        final String os = System.getProperty("os.name");
-        try {
-            if (os.contains("Linux")) {
-                System.out.print("\033\143");
-            } else if (os.contains("Windows")) {
-                new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
-            }
-            System.out.print("\033[H\033[2J");
-            System.out.flush();
-        } catch (final Exception e) {
-            System.err.println(e.getMessage());
-        }
+        input.close();
     }
 }
